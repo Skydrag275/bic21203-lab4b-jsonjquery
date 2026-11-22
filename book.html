@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 4B - Question 2: Books Data</title>
+</head>
+<body>
+  <h1>Books Information</h1>
+  <div id="output">Loading books...</div>
+
+  <script>
+    const outputEl = document.getElementById("output");
+
+    function createLabeledItem(label, value) {
+      const p = document.createElement("p");
+      const strong = document.createElement("strong");
+      strong.textContent = label;
+      p.appendChild(strong);
+      p.appendChild(document.createTextNode(value));
+      return p;
+    }
+
+    async function loadBooks() {
+      try {
+        const response = await fetch("./books.json");
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data || !Array.isArray(data.books) || data.books.length < 2) {
+          throw new Error("Invalid books data structure.");
+        }
+
+        const firstBook = data.books[0];
+        const secondBook = data.books[1];
+
+        outputEl.textContent = "";
+
+        outputEl.appendChild(
+          createLabeledItem("(a) Title of the first book: ", firstBook.title)
+        );
+        outputEl.appendChild(
+          createLabeledItem("(b) Author of the second book: ", secondBook.author)
+        );
+
+        const genresHeading = document.createElement("p");
+        const genresStrong = document.createElement("strong");
+        genresStrong.textContent = "(c) Genres by book title:";
+        genresHeading.appendChild(genresStrong);
+        outputEl.appendChild(genresHeading);
+
+        const ul = document.createElement("ul");
+        data.books.forEach((book) => {
+          const li = document.createElement("li");
+          const genresText = Array.isArray(book.genres)
+            ? book.genres.join(", ")
+            : "";
+          li.textContent = `${book.title} — ${genresText}`;
+          ul.appendChild(li);
+        });
+        outputEl.appendChild(ul);
+      } catch (error) {
+        outputEl.textContent =
+          "Unable to load books data at the moment. Please ensure books.json is valid and served over a local server.";
+        console.error(error);
+      }
+    }
+
+    loadBooks();
+  </script>
+</body>
+</html>
